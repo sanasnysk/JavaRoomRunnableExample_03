@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">JavaRoomRunnableExample_03</string>
+    <string name="user_name">User Name</string>
+    <string name="insert_user">Insert User</string>
 </resources>
