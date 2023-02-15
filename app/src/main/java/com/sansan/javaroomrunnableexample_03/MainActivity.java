@@ -1,25 +1,24 @@
 package com.sansan.javaroomrunnableexample_03;
 
-import androidx.activity.result.ActivityResult;
-import androidx.activity.result.ActivityResultCallback;
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContract;
-import androidx.activity.result.contract.ActivityResultContracts;
+import android.annotation.SuppressLint;
+import android.content.Context;
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.View;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.content.Intent;
-import android.os.Bundle;
-import android.view.View;
-import android.widget.Toast;
-
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
-import java.util.List;
+import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
+    private ArrayList<User> userList;
+    private Context context;
     UserAdapter adapter;
+    UserDatabase db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,25 +26,60 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         FloatingActionButton flb = findViewById(R.id.flb);
+
+        context = getApplicationContext();
+        adapter = new UserAdapter(this,userList);
+
+        db = UserDatabase.getInstance(this);
+
+        recyclerViewRun();
+
         flb.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent_insert = new Intent(getApplicationContext(), InsertUserActivity.class);
-                activityResult.launch(intent_insert);
+                startActivity(intent_insert);
 
                 finish();
             }
         });
 
-        RecyclerView recyclerView = findViewById(R.id.rv_list);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+    }
 
-        adapter = new UserAdapter();
+    private void recyclerViewRun(){
+        Thread thread = new Thread(){
+            @SuppressLint("NotifyDataSetChanged")
+            public void run(){
+                userList = (ArrayList<User>) UserDatabase.getInstance(context)
+                        .userDao()
+                        .getAllUser();
+                adapter = new UserAdapter(MainActivity.this,userList);
+                adapter.notifyDataSetChanged();
 
-        recyclerView.setAdapter(adapter);
+                RecyclerView recyclerView = findViewById(R.id.rv_list);
+
+                LinearLayoutManager layoutManager = new LinearLayoutManager(context,RecyclerView.VERTICAL,false);
+                recyclerView.setLayoutManager(layoutManager);
+                recyclerView.setAdapter(adapter);
+                recyclerView.setHasFixedSize(true);
+            }
+        };
+        thread.start();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        UserDatabase.destroyInstance();
+        db = null;
+    }
+
+    /*
+    protected void onNewIntent(Intent intent) {
+
+        super.onNewIntent(intent);
 
         loadUserList();
-
     }
 
     ActivityResultLauncher<Intent> activityResult = registerForActivityResult(
@@ -61,6 +95,7 @@ public class MainActivity extends AppCompatActivity {
             }
     );
 
+
     private void loadUserList() {
         UserDatabase db = UserDatabase.getInstance(this.getApplicationContext());
 
@@ -68,10 +103,14 @@ public class MainActivity extends AppCompatActivity {
         if (userList.size() > 0){
             int position = userList.size() - 1;
 
-            Toast.makeText(this, "최근등록자" + userList.get(position).userName, Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "최근등록자" + userList.get(position).userName,
+                    Toast.LENGTH_SHORT).show();
         }else {
-            Toast.makeText(this, "No Data", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "No Data",
+                    Toast.LENGTH_SHORT).show();
         }
 
     }
+
+     */
 }

@@ -1,12 +1,13 @@
 package com.sansan.javaroomrunnableexample_03;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 public class InsertUserActivity extends AppCompatActivity {
     private EditText edt_name;
@@ -28,7 +29,12 @@ public class InsertUserActivity extends AppCompatActivity {
                 String uName = edt_name.getText().toString();
                 String uAge = edt_age.getText().toString();
 
-                insertUser(uName, uAge);
+                    insertUser(uName, uAge);
+
+                    Intent intent_insert = new Intent(getApplicationContext(), MainActivity.class);
+                    startActivity(intent_insert);
+
+                    finish();
             }
         });
 
@@ -42,10 +48,11 @@ public class InsertUserActivity extends AppCompatActivity {
                 user.userName = name;
                 user.userAge = age;
 
-                UserDatabase db = UserDatabase.getInstance(InsertUserActivity.this);
-                db.userDao().insertUser(user);
+                    UserDatabase db = UserDatabase.getInstance(InsertUserActivity.this);
+                    db.userDao().insertUser(user);
 
                 setResult(Activity.RESULT_OK);
+                db.close();
             }
         };
         t.start();
